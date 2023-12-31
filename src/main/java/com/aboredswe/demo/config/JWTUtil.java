@@ -6,8 +6,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
 
 import java.security.Key;
 import java.util.Date;
@@ -19,6 +22,8 @@ import java.util.function.Function;
 public class JWTUtil {
 
     private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
+    private String jwtCookieName = "AuthCookie";
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -67,5 +72,15 @@ public class JWTUtil {
 
     private Date extractExpiration(String token) {
         return extractClaim(token,Claims::getExpiration);
+    }
+
+    public String getJwtFromCookies(HttpServletRequest request) {
+        Cookie cookie = WebUtils.getCookie(request,jwtCookieName);
+        if(cookie != null){
+            return cookie.getValue();
+        }
+        else{
+            return null;
+        }
     }
 }

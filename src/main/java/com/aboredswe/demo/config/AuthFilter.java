@@ -32,13 +32,18 @@ public class AuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
-        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+//        String authHeader = request.getHeader("Authorization");
+//        if(authHeader == null || !authHeader.startsWith("Bearer ")){
+//            filterChain.doFilter(request,response);
+//            return;
+//        }
+//        String token = authHeader.substring(7);
+        String token = parseJwt(request);
+        log.info("Token in AuthFilter:"+token);
+        if(token == null || token.trim().isEmpty()){
             filterChain.doFilter(request,response);
             return;
         }
-        String token = authHeader.substring(7);
-        log.info("Token in AuthFilter:"+token);
         String userEmail = jwtUtil.extractUsername(token);
 
         //check if not already authenticated
@@ -57,5 +62,9 @@ public class AuthFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request,response);
+    }
+
+    private String parseJwt(HttpServletRequest request) {
+        return jwtUtil.getJwtFromCookies(request);
     }
 }
